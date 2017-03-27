@@ -1,0 +1,369 @@
+﻿//抱歉，没有符合条件的结果
+if (typeof (Sou) == "undefined")
+    Sou = {};
+(function () {
+    var ie = !!(window.attachEvent && !window.opera);
+    var wk = /webkit\/(\d+)/i.test(navigator.userAgent) && (RegExp.$1 < 525);
+    var fn = [];
+    var run = function () { for (var i = 0; i < fn.length; i++) fn[i](); };
+    var d = document;
+    d.ready = function (f) {
+        if (!ie && !wk && d.addEventListener)
+            return d.addEventListener('DOMContentLoaded', f, false);
+        if (fn.push(f) > 1) return;
+        if (ie)
+            (function () {
+                try { d.documentElement.doScroll('left'); run(); }
+                catch (err) { setTimeout(arguments.callee, 0); }
+            })();
+        else if (wk)
+            var t = setInterval(function () {
+                if (/^(loaded|complete)$/.test(d.readyState))
+                    clearInterval(t), run();
+            }, 0);
+    };
+})();
+if (typeof (Sou.Ajax) == "undefined")
+    Sou.Ajax = {};
+Sou.Ajax.lastScript;
+Sou.Ajax.h = document.getElementsByTagName("head")[0];
+
+Sou.Ajax.loadScript = function (url) {
+    var f = document.createElement("script");
+    var d = new Date().getTime();
+    f.type = "text/javascript";
+    f.id = d;
+    f.src = url;
+    Sou.Ajax.h.appendChild(f);
+    if (Sou.Ajax.lastScript && Sou.Ajax.g(Sou.Ajax.lastScript))
+        Sou.Ajax.g(Sou.Ajax.lastScript).parentNode.removeChild(Sou.Ajax.g(Sou.Ajax.lastScript));
+    Sou.Ajax.lastScript = d;
+}
+Sou.Ajax.loadScript = function (url, isRemove) {
+    var f = document.createElement("script");
+    var d = new Date().getTime();
+    f.type = "text/javascript";
+    f.id = d;
+    f.src = url;
+    Sou.Ajax.h.appendChild(f);
+    if (Sou.Ajax.lastScript && Sou.Ajax.g(Sou.Ajax.lastScript) && isRemove)
+        Sou.Ajax.g(Sou.Ajax.lastScript).parentNode.removeChild(Sou.Ajax.g(Sou.Ajax.lastScript));
+    Sou.Ajax.lastScript = d;
+}
+Sou.Ajax.g = function (x) {
+    return document.getElementById(x)
+};
+if (typeof (Sou.Autocomplate) == "undefined")
+    Sou.Autocomplate = {};
+var tipNum = 0;
+Sou.Autocomplate.AddAutocomplate = function (obj) {
+    var keyword = obj.value;
+    var tip = document.getElementById("autocomplateTip");
+    var timeOut;
+    var isIE = navigator.userAgent.indexOf("MSIE") != -1 && !window.opera;
+    function getData(e) {
+        e = e || window.event;
+        if (e.keyCode != 38 && e.keyCode != 40) {
+            tipNum = 0;
+            try {
+                Sou.Ajax.loadScript(Sou.Autocomplate.DataUri + escape(obj.value));
+                Sou.Autocomplate.Context.sid = newGuid();
+                Sou.Autocomplate.Context.q = obj.value;
+                Sou.Autocomplate.Context.method = 0;
+            } catch (e) {
+            }
+        }
+    }
+    function move(e) {
+        e = e || window.event;
+        if (e.keyCode == 13) {
+            //if (isIE) {
+            //    e.returnValue = false
+            //}
+            //else {
+            //    e.preventDefault()
+            //}
+            if (document.getElementById("pvareaid") != null)
+                document.getElementById("pvareaid").value = "100834";
+            //setTimeout(function () { document.getElementById("souform").submit() }, 0);
+
+            var current = tip.getElementsByTagName("a")[tipNum - 1];
+            Sou.Autocomplate.Context.seq = tipNum - 1;
+            var maxli = tip.getElementsByTagName("li").length;
+            if (tipNum > maxli)
+                Sou.Autocomplate.Context.type = 1;
+            Sou.Autocomplate.Context.method = 1;
+            //Sou.Autocomplate.summitform(current.attributes["title"].value);
+        }
+        if (e.keyCode == 38 || e.keyCode == 40) {
+            if (tip.style.display != "none") {
+                var maxli = tip.getElementsByTagName("li").length;
+                var maxseries = tip.getElementsByTagName("dd").length;
+                var max = maxli + maxseries;
+                if (e.keyCode == 38) {
+                    tipNum--;
+                    if (tipNum <= 0)
+                        tipNum = max;
+                }
+                if (e.keyCode == 40) {
+                    tipNum++;
+                    if (tipNum > max)
+                        tipNum = 1;
+                }
+                var current = tip.getElementsByTagName("a")[tipNum - 1];
+                for (var i = 0; i < max; i++) {
+                    tip.getElementsByTagName("a")[i].style.backgroundColor = "";
+                }
+                current.style.backgroundColor = "#e7f0f9"
+                obj.value = current.title;
+            }
+        }
+    }
+    obj.onkeyup = getData;
+    obj.onkeydown = move;
+};
+
+Sou.Autocomplate.LogUri = "http://sou.autohome.com.cn/stats/SuggestClick.ashx?";
+Sou.Autocomplate.DataUri = "";
+Sou.Autocomplate.HaveRecommend = "";
+
+function t(a) { var e = ""; for (n in a) e += n + "=" + encodeURIComponent(a[n]) + "&"; return e }
+function getCookie(e) { var t = document.cookie.split("; "); for (var n = 0; n < t.length; n++) { var r = t[n].split("="); if (e == r[0]) return unescape(r[1]) } return "" }
+function newGuid() { var guid = ""; for (var i = 1; i <= 18; i++) { var n = Math.floor(Math.random() * 10.0).toString(10); guid += n; } return guid; }
+
+Sou.Autocomplate.Submit = function submitSearch() {
+    document.getElementById('souform').submit();
+    //if (Sou.Autocomplate.Version != undefined)
+    //    Sou.Autocomplate.Context.context = JSON.stringify({ version: Sou.Autocomplate.Version });
+    Sou.Autocomplate.Context.sid = newGuid();
+    Sou.Autocomplate.Context.q = document.getElementById("souform").getElementsByTagName("input")[0].value;
+    Sou.Autocomplate.Context.cq = "";
+    Sou.Autocomplate.Context.seq = 0;
+    //Sou.Autocomplate.Context.method = $("#type").val();
+    (new Image()).src = Sou.Autocomplate.LogUri + t(Sou.Autocomplate.Context);
+}
+
+Sou.Autocomplate.Context = {
+    "scid": '',
+    "q": '',
+    "cq": '',
+    "uri": window.location,
+    "uid": getCookie('sessionid'),
+    "uuid": getCookie('UniqueUserId'),
+    "adr": getCookie('sessionip'),
+    "seq": 0,
+    "type": 0,
+    "pf": 0,
+    "method": 0,
+    "ev": '0',
+    "sid": 0,
+    "context": ''
+}
+
+Sou.Autocomplate.summitform = function (keyword, type, seriesid, seq, atype) {
+    document.getElementById("q").value = keyword;
+    if (document.getElementById("pvareaid") != null)
+        document.getElementById("pvareaid").value = "100835";
+    if (type == 1) {
+        (new Image()).src = "http://sou.autohome.com.cn/stats/TipWordSouLog.ashx?word=" + keyword + "&type=1";
+        window.open("http://sou.autohome.com.cn/Api/TipWordSearchLogs/add?word=" + keyword + "&seriesid=" + seriesid + "&type=1");
+        return false;
+    } else {
+        setTimeout(function () { document.getElementById("souform").submit() }, 0);
+    }
+    if (seq != keyword)
+        Sou.Autocomplate.Context.cq = keyword;
+    if (seq != undefined)
+        Sou.Autocomplate.Context.seq = seq;
+    if (atype != undefined)
+        Sou.Autocomplate.Context.type = atype;
+    (new Image()).src = Sou.Autocomplate.LogUri + t(Sou.Autocomplate.Context);
+}
+Sou.Autocomplate.bindAutocomplate = function (json) {
+    !function () { function a(a) { var b = this.os = {}, c = this.browser = {}, d = a.match(/Web[kK]it[\/]{0,1}([\d.]+)/), e = a.match(/(Android);?[\s\/]+([\d.]+)?/), f = a.match(/(iPad).*OS\s([\d_]+)/), g = a.match(/(iPod)(.*OS\s([\d_]+))?/), h = !f && a.match(/(iPhone\sOS)\s([\d_]+)/), i = a.match(/(webOS|hpwOS)[\s\/]([\d.]+)/), j = i && a.match(/TouchPad/), k = a.match(/Kindle\/([\d.]+)/), l = a.match(/Silk\/([\d._]+)/), m = a.match(/(BlackBerry).*Version\/([\d.]+)/), n = a.match(/(BB10).*Version\/([\d.]+)/), o = a.match(/(RIM\sTablet\sOS)\s([\d.]+)/), p = a.match(/PlayBook/), q = a.match(/Chrome\/([\d.]+)/) || a.match(/CriOS\/([\d.]+)/), r = a.match(/Firefox\/([\d.]+)/), s = a.match(/MSIE\s([\d.]+)/), t = d && a.match(/Mobile\//) && !q, u = a.match(/(iPhone|iPod|iPad).*AppleWebKit(?!.*Safari)/) && !q; (c.webkit = !!d) && (c.version = d[1]), e && (b.android = !0, b.version = e[2]), h && !g && (b.ios = b.iphone = !0, b.version = h[2].replace(/_/g, ".")), f && (b.ios = b.ipad = !0, b.version = f[2].replace(/_/g, ".")), g && (b.ios = b.ipod = !0, b.version = g[3] ? g[3].replace(/_/g, ".") : null), i && (b.webos = !0, b.version = i[2]), j && (b.touchpad = !0), m && (b.blackberry = !0, b.version = m[2]), n && (b.bb10 = !0, b.version = n[2]), o && (b.rimtabletos = !0, b.version = o[2]), p && (c.playbook = !0), k && (b.kindle = !0, b.version = k[1]), l && (c.silk = !0, c.version = l[1]), !l && b.android && a.match(/Kindle Fire/) && (c.silk = !0), q && (c.chrome = !0, c.version = q[1]), r && (c.firefox = !0, c.version = r[1]), s && (c.ie = !0, c.version = s[1]), t && (a.match(/Safari/) || b.ios) && (c.safari = !0), u && (c.webview = !0), b.tablet = !!(f || p || e && !a.match(/Mobile/) || r && a.match(/Tablet/) || s && !a.match(/Phone/) && a.match(/Touch/)), b.phone = !(b.tablet || b.ipod || !(e || h || i || m || n || q && a.match(/Android/) || q && a.match(/CriOS\/([\d.]+)/) || r && a.match(/Mobile/) || s && a.match(/Touch/))) } a.call(window, navigator.userAgent) }();
+    var tip = document.getElementById("autocomplateTip");
+    if (json.length > 0) {
+        var arrKey = json.split(',');
+        var strHtml = "<ul class=\"search-pop-letter\">";
+        var strSeriesHtml = "<div class=\"search-pop-direct\"><i class=\"icon12 icon12-down2\"></i>点击直达</div><dl class=\"search-pop-cars\">";
+        var strSeries = "";
+        for (var i = 0; i < arrKey.length; i++) {
+            var id = "div" + (i + 1);
+            var arrSeriesKey = arrKey[i].toString().split(':');
+            if (arrSeriesKey.length > 0 && arrSeriesKey[2] != null) {
+                var pricestr = "暂无报价";
+                if (arrSeriesKey[2] != 0 || arrSeriesKey[3] != 0) {
+                    if (arrSeriesKey[2] != arrSeriesKey[3])
+                        pricestr = arrSeriesKey[2] + "-" + arrSeriesKey[3] + "万";
+                    else
+                        pricestr = arrSeriesKey[2] + "万";
+                }
+                if (window.os.tablet || window.os.phone) {
+                    if (arrSeriesKey[4] == 1 && pricestr != "暂无报价") {
+                        strSeries += "<dd><a href=\"javascript:void(0);\" target=\"_self\" onclick=\"Sou.Autocomplate.summitform('" + arrSeriesKey[0] + "',1," + arrSeriesKey[1] + "," + i + ",1)\" title=\"" + arrSeriesKey[0] + "\"><span class=\"name\">" + arrSeriesKey[0] + "</span><span class=\"price\">" + pricestr + "</span><i class=\"icon12 icon12-yu\" title=\"预售价\"></i></a></dd>";
+                    } else if (arrSeriesKey[4] == 3 && pricestr != "暂无报价") {
+                        strSeries += "<dd><a href=\"javascript:void(0);\" target=\"_self\" onclick=\"Sou.Autocomplate.summitform('" + arrSeriesKey[0] + "',1," + arrSeriesKey[1] + "," + i + ",1)\" title=\"" + arrSeriesKey[0] + "\"><span class=\"name\">" + arrSeriesKey[0] + "</span><span class=\"price\">" + pricestr + "</span><i class=\"icon12 icon12-ting\" title=\"停售前价格\"></i></a></dd>"
+                    } else {
+                        strSeries += "<dd><a href=\"javascript:void(0);\" target=\"_self\" onclick=\"Sou.Autocomplate.summitform('" + arrSeriesKey[0] + "',1," + arrSeriesKey[1] + "," + i + ",1)\" title=\"" + arrSeriesKey[0] + "\"><span class=\"name\">" + arrSeriesKey[0] + "</span><span class=\"price\">" + pricestr + "</span></a></dd>"
+                    }
+                } else {
+                    if (arrSeriesKey[4] == 1 && pricestr != "暂无报价") {
+                        strSeries += "<dd><a href=\"javascript:void(0);\" target=\"_self\" onclick=\"Sou.Autocomplate.summitform('" + arrSeriesKey[0] + "',1," + arrSeriesKey[1] + "," + i + ",1)\" title=\"" + arrSeriesKey[0] + "\"><span class=\"name\">" + arrSeriesKey[0] + "</span><i class=\"icon10 icon10-right\"></i><span class=\"price\">" + pricestr + "</span><i class=\"icon12 icon12-yu\" title=\"预售价\"></i></a></dd>";
+                    } else if (arrSeriesKey[4] == 3 && pricestr != "暂无报价") {
+                        strSeries += "<dd><a href=\"javascript:void(0);\" target=\"_self\" onclick=\"Sou.Autocomplate.summitform('" + arrSeriesKey[0] + "',1," + arrSeriesKey[1] + "," + i + ",1)\" title=\"" + arrSeriesKey[0] + "\"><span class=\"name\">" + arrSeriesKey[0] + "</span><i class=\"icon10 icon10-right\"></i><span class=\"price\">" + pricestr + "</span><i class=\"icon12 icon12-ting\" title=\"停售前价格\"></i></a></dd>"
+                    } else {
+                        strSeries += "<dd><a href=\"javascript:void(0);\" target=\"_self\" onclick=\"Sou.Autocomplate.summitform('" + arrSeriesKey[0] + "',1," + arrSeriesKey[1] + "," + i + ",1)\" title=\"" + arrSeriesKey[0] + "\"><span class=\"name\">" + arrSeriesKey[0] + "</span><i class=\"icon10 icon10-right\"></i><span class=\"price\">" + pricestr + "</span></a></dd>"
+                    }
+                }
+            } else {
+                var keyword = document.getElementById("q").value;
+                var show = arrKey[i].indexOf(keyword) > -1 ? arrKey[i].substring(0, arrKey[i].indexOf(keyword) + keyword.length) + "<strong>" + arrKey[i].substring(arrKey[i].indexOf(keyword) + keyword.length) + "</strong>" : arrKey[i];
+                strHtml += "<li><a href=\"javascript:void(0);\" target=\"_self\" onclick=\"Sou.Autocomplate.summitform('" + arrKey[i] + "',0,0," + i + ",0)\" title=\"" + arrKey[i] + "\">" + show + "</a></li>";
+            }
+        }
+        if (strHtml != "<ul class=\"search-pop-letter\">") {
+            strHtml += "</ul>";
+        } else {
+            strHtml = "";
+        }
+        strSeries += "</dl>";
+        if (strSeries != "</dl>") {
+            strSeriesHtml += strSeries;
+        } else {
+            strSeriesHtml = "";
+        }
+        strHtml += strSeriesHtml;
+        tip.innerHTML = strHtml;
+        tip.style.display = "block";
+    }
+    else {
+        tip.style.display = "none";
+    }
+}
+
+document.onclick = function (e) {
+    e = e || window.event;
+    var dom = e.srcElement || e.target;
+    var objword = document.getElementById("autocomplateTip");
+    if (objword != null) {
+        if (dom.id != "autocomplateTip" && dom.id != "q" && document.getElementById("autocomplateTip").style.display == "block") {
+            document.getElementById("autocomplateTip").style.display = "none";
+        }
+    }
+};
+
+
+
+Sou.Autocomplate.OnFocusClear = function (obj, divobj) {
+    function onfocusclear() {
+        var url = window.location.href;
+        if (url != undefined && url.indexOf("sou.autohome.com.cn") != -1) {
+            if (obj.value != null && obj.value.length > 0) {
+                if (divobj != undefined) {
+                    divobj.className = "searchbar searchbar-hover";
+                }
+                Sou.Ajax.loadScript(Sou.Autocomplate.DataUri + escape(obj.value));
+                Sou.Autocomplate.Context.sid = newGuid();
+                Sou.Autocomplate.Context.q = obj.value;
+                Sou.Autocomplate.Context.cq = "";
+                Sou.Autocomplate.Context.method = 2;
+                (new Image()).src = Sou.Autocomplate.LogUri + t(Sou.Autocomplate.Context);
+            }
+        }
+        else {
+            document.getElementById("q").value = "";
+        }
+    }
+    function onblurclear() {
+        if (divobj != undefined) {
+            divobj.className = "searchbar";
+        }
+        if (navigator.userAgent.indexOf("MSIE") != -1 && !window.opera)
+            setTimeout(function () { document.getElementById("autocomplateTip").style.display = "none" }, 300);
+    }
+    obj.onfocus = onfocusclear;
+    obj.onblur = onblurclear;
+}
+
+if (window.location.href.indexOf("sou.autohome.com.cn") == -1) {
+    var seriesForSearch = "大众,奔驰,现代,福特,丰田,本田,别克,宝马,长安,奥迪", seriesForSearchArr = seriesForSearch.split(","), seriesForSearchArrMatch;
+    seajs.use("jquery",
+    function ($) {
+        $(function () {
+
+            var randomSeries = function (o) {
+                var seriesArr = seriesForSearchArr;
+                var repeatCount = 0;
+                for (var c = 0; c < 10; c++) {
+                    var randomSeries = seriesArr[Math.floor(Math.random() * seriesArr.length)];
+                    if (Sou.Autocomplate.HaveRecommend.indexOf(randomSeries) == -1) {
+                        $(o).val(randomSeries);
+                        $(o).attr("data-val", randomSeries);
+                        Sou.Autocomplate.HaveRecommend += randomSeries + ",";
+                        break;
+                    } else {
+                        repeatCount++;
+                        if (repeatCount == 10) {
+                            $(o).val(randomSeries);
+                            $(o).attr("data-val", randomSeries);
+                            break;
+                        }
+                    }
+                }
+                Sou.Autocomplate.Context.method = 99;
+            };
+            $("#q").blur(function () {
+                if ($(this).val() == "") randomSeries(this)
+            }).focus(function () {
+                $(this).val("")
+            });
+            randomSeries($("#q"));
+            $.ajax({
+                url: 'http://sou.api.autohome.com.cn/v2/web/KwRecommend?uid=' + getCookie('sessionid') + "&ip=" + getCookie('sessionip') + "&city=" + getCookie('area') + '&_appid=www&_callback=?',
+                dataType: 'json',
+                success: function (o) {
+                    if (o != undefined && o.result != undefined) {
+                        if (o.result.isenable == true && o.result.list != undefined && o.result.list.length > 0) {
+                            var arr = new Array(o.result.list.length)
+                            var arrMatch = new Array(o.result.list.length)
+                            for (var i in o.result.list) {
+                                arr[i] = o.result.list[i].name;
+                                arrMatch[i] = o.result.list[i].matchword;
+                            }
+                            seriesForSearchArr = arr;
+                            seriesForSearchArrMatch = arrMatch;
+
+                            var kw = arr[0];
+                            $(o).val(kw);
+                            $(o).attr("data-val", kw);
+                            Sou.Autocomplate.HaveRecommend += kw + ",";
+                        }
+                        if (o.result.suguri != undefined) {
+                            Sou.Autocomplate.DataUri = o.result.suguri;
+                        }
+                        Sou.Autocomplate.IsRecommendTopic = o.result.isrecommendtopic;
+                        Sou.Autocomplate.IsStatRecClick = o.result.isstatrecclick;
+                        Sou.Autocomplate.Context.context = JSON.stringify({ version: o.result.version });
+						randomSeries($("#q"));
+                    }
+                }
+            });
+
+        })
+    });
+}
+
+
+
+
+//加载完成
+document.ready(function () {
+    var text = document.getElementById("q");
+    Sou.Autocomplate.AddAutocomplate(text);
+    if (text != null) {
+        var divtext = document.getElementById("soudiv");
+        Sou.Autocomplate.OnFocusClear(text, divtext);
+    }
+});
+
+
