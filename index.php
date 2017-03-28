@@ -6,18 +6,69 @@ use Zend\Dom\Document;
 
 //file_put_contents('filename.txt','');
 
+$mysqli = new mysqli("localhost", "root", "", "test");
+
+/* check connection */
+if (mysqli_connect_errno()) {
+    printf("Connect failed: %s\n", mysqli_connect_error());
+    exit();
+}
+
+$mysqli->query('SET NAMES UTF8');
+
+
 $rang = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 $dom = new Query();
 $content = file_get_contents("./source/autohome.html");
 $document = new Document($content);
 
-//$results = $dom->execute('.foo .bar a');
-//$results = $dom->execute('#htmlA',$document,'TYPE_CSS');
-$results = $dom->execute('#htmlA dl dt div a',$document,'TYPE_CSS');
+for($i = 0; $i < 26; $i++){
+    $html = '#html'.$rang[$i];
+    $brandResults = $dom->execute("$html dl dt div a",$document,'TYPE_CSS');
+    $brandWithModelResults = $dom->execute("$html dl dt div a, $html dl dd ul h4 a,$html dl dt a img",$document,'TYPE_CSS');
 
-$count = count($results); 
-echo $count;
-foreach ($results as $result) {
-    var_dump($result->nodeValue);
-    // $result is a DOMElement
+    $brandLength = count($brandResults);
+    $brandWithModelLength = count($brandWithModelResults);
+    for($j = 0; $j < $brandLength; $j++){
+        echo "<hr/>";
+        echo $brandResults[$j]->nodeValue,"<br/>";
+        //插入brand
+        $mysqli->query("INSERT INTO `car_brand` VALUES (null, "."'".$brandResults[$j]->nodeValue."',"."'".$rang[$i]."',null)");
+        $brandID = $mysqli->insert_id;
+
+        for($k = 0; $k < $brandWithModelLength; $k++){
+            //添加一个判断，就是左边栏目的nodeValue才匹配
+            if($brandResults[$j]->nodeValue == $brandWithModelResults[$k]->nodeValue
+               && $brandWithModelResults[$k]->parentNode->parentNode->nodeName == 'dt'
+            ){
+                $start = $k;
+            }
+
+            if(isset($brandResults[$j+1])){
+                if($brandResults[$j+1]->nodeValue == $brandWithModelResults[$k]->nodeValue){
+                    $end = $k;
+                }
+            }else{
+                $end = $brandWithModelLength;
+            }
+        }
+        
+        //提取img
+        $imgPath = $brandWithModelResults[$start - 1]->getAttribute('src');
+        echo $imgPath,"<br/>";
+        rename($imgPath, "./car_logo/");
+        $mysqli->query("UPDATE `car_brand` SET `img_path` = " . "'" . $imgPath . "' WHERE `id` = " . $brandID);
+
+        for($l = $start + 1; $l < $end; $l++){
+            if($brandWithModelResults[$l]->nodeName == 'a'){
+                echo ">>>",$brandWithModelResults[$l]->nodeValue,"<br/>";
+                $mysqli->query("INSERT INTO `car_model` VALUES (null, " . $brandID . ",'" . $brandWithModelResults[$l]->nodeValue . "')");
+                //var_dump($brandWithModelResults[$l]->nodeValue);
+            }
+        }
+    }
 }
+
+
+
+
