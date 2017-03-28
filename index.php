@@ -4,8 +4,6 @@ require_once("./vendor/autoload.php");
 use Zend\Dom\Document\Query;
 use Zend\Dom\Document;
 
-//file_put_contents('filename.txt','');
-
 $mysqli = new mysqli("localhost", "root", "", "test");
 
 /* check connection */
@@ -55,9 +53,10 @@ for($i = 0; $i < 26; $i++){
         
         //提取img
         $imgPath = $brandWithModelResults[$start - 1]->getAttribute('src');
-        echo $imgPath,"<br/>";
-        rename($imgPath, "./car_logo/");
-        $mysqli->query("UPDATE `car_brand` SET `img_path` = " . "'" . $imgPath . "' WHERE `id` = " . $brandID);
+        $pathinfo = pathinfo($imgPath);
+
+        //rename(getcwd()."\\source\\autohome_files\\".$pathinfo['basename'], getcwd().'\\logo\\'.$brandID.".".$pathinfo['extension']);
+        $mysqli->query("UPDATE `car_brand` SET `img_path` = " . "'" . $brandID.".".$pathinfo['extension'] . "' WHERE `id` = " . $brandID);
 
         for($l = $start + 1; $l < $end; $l++){
             if($brandWithModelResults[$l]->nodeName == 'a'){
