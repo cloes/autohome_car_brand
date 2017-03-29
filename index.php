@@ -6,25 +6,12 @@ use Zend\Dom\Document;
 
 $mysqli = new mysqli("localhost", "root", "", "test");
 
-/* check connection */
 if (mysqli_connect_errno()) {
     printf("Connect failed: %s\n", mysqli_connect_error());
     exit();
 }
 
 $mysqli->query('SET NAMES UTF8');
-
-
-$mysqli = new mysqli("localhost", "root", "", "test");
-
-/* check connection */
-if (mysqli_connect_errno()) {
-    printf("Connect failed: %s\n", mysqli_connect_error());
-    exit();
-}
-
-$mysqli->query('SET NAMES UTF8');
-
 
 $rang = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 $dom = new Query();
@@ -75,12 +62,7 @@ for($i = 0; $i < 26; $i++){
             if($brandWithModelResults[$l]->nodeName == 'a'){
                 echo ">>>",$brandWithModelResults[$l]->nodeValue,"<br/>";
                 $mysqli->query("INSERT INTO `car_model` VALUES (null, " . $brandID . ",'" . $brandWithModelResults[$l]->nodeValue . "')");
-                //var_dump($brandWithModelResults[$l]->nodeValue);
             }
         }
     }
 }
-
-
-
-
