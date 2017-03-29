@@ -4,7 +4,16 @@ require_once("./vendor/autoload.php");
 use Zend\Dom\Document\Query;
 use Zend\Dom\Document;
 
-//file_put_contents('filename.txt','');
+$mysqli = new mysqli("localhost", "root", "", "test");
+
+/* check connection */
+if (mysqli_connect_errno()) {
+    printf("Connect failed: %s\n", mysqli_connect_error());
+    exit();
+}
+
+$mysqli->query('SET NAMES UTF8');
+
 
 $mysqli = new mysqli("localhost", "root", "", "test");
 
@@ -36,6 +45,7 @@ for($i = 0; $i < 26; $i++){
         $mysqli->query("INSERT INTO `car_brand` VALUES (null, "."'".$brandResults[$j]->nodeValue."',"."'".$rang[$i]."',null)");
         $brandID = $mysqli->insert_id;
 
+
         for($k = 0; $k < $brandWithModelLength; $k++){
             //添加一个判断，就是左边栏目的nodeValue才匹配
             if($brandResults[$j]->nodeValue == $brandWithModelResults[$k]->nodeValue
@@ -55,9 +65,11 @@ for($i = 0; $i < 26; $i++){
         
         //提取img
         $imgPath = $brandWithModelResults[$start - 1]->getAttribute('src');
-        echo $imgPath,"<br/>";
-        rename($imgPath, "./car_logo/");
-        $mysqli->query("UPDATE `car_brand` SET `img_path` = " . "'" . $imgPath . "' WHERE `id` = " . $brandID);
+
+        $pathinfo = pathinfo($imgPath);
+
+        //rename(getcwd()."\\source\\autohome_files\\".$pathinfo['basename'], getcwd().'\\logo\\'.$brandID.".".$pathinfo['extension']);
+        $mysqli->query("UPDATE `car_brand` SET `img_path` = " . "'" . $brandID.".".$pathinfo['extension'] . "' WHERE `id` = " . $brandID);
 
         for($l = $start + 1; $l < $end; $l++){
             if($brandWithModelResults[$l]->nodeName == 'a'){
