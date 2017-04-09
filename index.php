@@ -56,6 +56,7 @@ for($i = 0; $i < 26; $i++){
         $pathinfo = pathinfo($imgPath);
 
         //rename(getcwd()."\\source\\autohome_files\\".$pathinfo['basename'], getcwd().'\\logo\\'.$brandID.".".$pathinfo['extension']);
+        copy(getcwd()."\\source\\autohome_files\\".$pathinfo['basename'], getcwd().'\\logo\\'.$brandID.".".$pathinfo['extension']);
         $mysqli->query("UPDATE `car_brand` SET `img_path` = " . "'" . $brandID.".".$pathinfo['extension'] . "' WHERE `id` = " . $brandID);
 
         for($l = $start + 1; $l < $end; $l++){
