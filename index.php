@@ -54,10 +54,13 @@ for($i = 0; $i < 26; $i++){
         $imgPath = $brandWithModelResults[$start - 1]->getAttribute('src');
 
         $pathinfo = pathinfo($imgPath);
+        $folder = 'carLogo';
+        $pathprefix = DIRECTORY_SEPARATOR . $folder .DIRECTORY_SEPARATOR;
 
         //rename(getcwd()."\\source\\autohome_files\\".$pathinfo['basename'], getcwd().'\\logo\\'.$brandID.".".$pathinfo['extension']);
-        copy(getcwd()."\\source\\autohome_files\\".$pathinfo['basename'], getcwd().'\\logo\\'.$brandID.".".$pathinfo['extension']);
-        $mysqli->query("UPDATE `car_brand` SET `img_path` = " . "'" . $brandID.".".$pathinfo['extension'] . "' WHERE `id` = " . $brandID);
+        //copy(getcwd()."\\source\\autohome_files\\".$pathinfo['basename'], getcwd().'\\logo\\'.$brandID.".".$pathinfo['extension']);
+        copy(getcwd()."\\source\\autohome_files\\".$pathinfo['basename'], getcwd(). $pathprefix . $brandID.".".$pathinfo['extension']);
+        $mysqli->query("UPDATE `car_brand` SET `img_path` = " . "'" . '\/' .$folder . '\/' . $brandID.".".$pathinfo['extension'] . "' WHERE `id` = " . $brandID);
 
         for($l = $start + 1; $l < $end; $l++){
             if($brandWithModelResults[$l]->nodeName == 'a'){
